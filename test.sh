@@ -4,7 +4,7 @@ try() {
   input="$2"
 
   echo "$input" | ./target/debug/yard-lang > tmp.ll
-  clang -target x86_64-apple-darwin17.6.0 -o tmp tmp.ll
+  clang -Wno-override-module -o tmp tmp.ll
   ./tmp
   actual="$?"
 
