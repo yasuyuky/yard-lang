@@ -8,7 +8,7 @@ enum Token {
 fn tokenize(buf: &str) -> Vec<Token> {
     let mut res: Vec<Token> = vec![];
     for c in buf.chars() {
-        if c.is_whitespace(){
+        if c.is_whitespace() {
             continue;
         } else if c.is_numeric() {
             let last = res.pop().unwrap_or(Token::Number(String::new()));
