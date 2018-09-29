@@ -28,11 +28,10 @@ fn tokenize(buf: &str) -> Vec<Token> {
     res
 }
 
-fn compile_buffer(buf: &str) -> String {
+fn gen(tokens: &Vec<Token>) -> String {
     let mut res: String;
-    res = format!("define i32 @main() {{\n");
-    let tokens = tokenize(&buf.trim());
     let l = tokens.len();
+    res = format!("define i32 @main() {{\n");
     for (i, t) in tokens.into_iter().enumerate() {
         if i == 0 {
             if let Token::Number(s) = t {
@@ -51,6 +50,11 @@ fn compile_buffer(buf: &str) -> String {
     }
     res += &format!(" ret i32 %x{}\n}}\n", l - 1);
     res
+}
+
+fn compile_buffer(buf: &str) -> String {
+    let tokens = tokenize(&buf.trim());
+    gen(&tokens)
 }
 
 fn main() -> io::Result<()> {
