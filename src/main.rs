@@ -31,7 +31,7 @@ fn tokenize(buf: &str) -> Vec<Token> {
 fn gen(tokens: &Vec<Token>) -> String {
     let mut res: String;
     let l = tokens.len();
-    res = format!("define i32 @main() {{\n");
+    res = "define i32 @main() {{\n".to_string();
     for (i, t) in tokens.into_iter().enumerate() {
         if i == 0 {
             if let Token::Number(s) = t {
