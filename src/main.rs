@@ -12,7 +12,7 @@ enum Ast {
 
 #[derive(Debug, Clone)]
 enum Exp {
-    BinExp(BinExp),
+    BinaryOp(BinOpExp),
     Number(String),
     Undefined,
 }
@@ -24,7 +24,7 @@ enum BinOp {
 }
 
 #[derive(Debug, Clone)]
-struct BinExp {
+struct BinOpExp {
     lhs: Box<Exp>,
     op: BinOp,
     rhs: Box<Exp>,
@@ -54,14 +54,14 @@ fn tokenize(buf: &str) -> Vec<Token> {
 }
 
 fn make_bexpl(lhs: &Exp, op: BinOp) -> Exp {
-    Exp::BinExp(BinExp {
+    Exp::BinaryOp(BinOpExp {
         lhs: Box::new(lhs.clone()),
         op,
         rhs: Box::new(Exp::Undefined),
     })
 }
 
-fn comp_bexpr(bexpl: &mut BinExp, rhs: Exp) {
+fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
     bexpl.rhs = Box::new(rhs);
 }
 
@@ -75,9 +75,9 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
                 "-" => stack.push(make_bexpl(exp, BinOp::Minus)),
                 _ => panic!("Undefined arithmetic operator"),
             },
-            (Some(Exp::BinExp(ref mut be)), Token::Number(s)) => {
-                comp_bexpr(be, Exp::Number(s.to_string()));
-                stack.push(Exp::BinExp(be.clone()))
+            (Some(Exp::BinaryOp(ref mut bo)), Token::Number(s)) => {
+                comp_bexpr(bo, Exp::Number(s.to_string()));
+                stack.push(Exp::BinaryOp(bo.clone()))
             }
             (None, Token::Arithmetic(_)) => panic!("First token is restricted to number"),
             (Some(Exp::Number(_)), Token::Number(_)) => panic!("Number Sequence"),
@@ -90,10 +90,10 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
 fn gen_from_exp(exp: &Exp, count: usize) -> (String, usize) {
     match exp {
         Exp::Number(s) => (format!(" %x{} = add i32 {}, 0 \n", count, s), count),
-        Exp::BinExp(be) => {
-            let (lhs, cl) = gen_from_exp(&be.lhs, count);
-            let (rhs, cr) = gen_from_exp(&be.rhs, cl + 1);
-            let op = match be.op {
+        Exp::BinaryOp(bo) => {
+            let (lhs, cl) = gen_from_exp(&bo.lhs, count);
+            let (rhs, cr) = gen_from_exp(&bo.rhs, cl + 1);
+            let op = match bo.op {
                 BinOp::Plus => "add",
                 BinOp::Minus => "sub",
             };
