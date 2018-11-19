@@ -57,7 +57,7 @@ fn tokenize(buf: &str) -> Vec<Token> {
 fn make_bexpl(lhs: &Exp, op: BinOp) -> Exp {
     Exp::BinExp(Box::new(BinExp {
         lhs: Box::new(lhs.clone()),
-        op: op,
+        op,
         rhs: Box::new(Exp::Undefined),
     }))
 }
