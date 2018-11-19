@@ -12,7 +12,7 @@ enum Ast {
 
 #[derive(Debug, Clone)]
 enum Exp {
-    BinExp(Box<BinExp>),
+    BinExp(BinExp),
     Number(String),
     Undefined,
 }
@@ -54,14 +54,14 @@ fn tokenize(buf: &str) -> Vec<Token> {
 }
 
 fn make_bexpl(lhs: &Exp, op: BinOp) -> Exp {
-    Exp::BinExp(Box::new(BinExp {
+    Exp::BinExp(BinExp {
         lhs: Box::new(lhs.clone()),
         op,
         rhs: Box::new(Exp::Undefined),
-    }))
+    })
 }
 
-fn comp_bexpr(bexpl: &mut Box<BinExp>, rhs: Exp) {
+fn comp_bexpr(bexpl: &mut BinExp, rhs: Exp) {
     bexpl.rhs = Box::new(rhs);
 }
 
@@ -77,7 +77,7 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
             },
             (Some(Exp::BinExp(ref mut be)), Token::Number(s)) => {
                 comp_bexpr(be, Exp::Number(s.to_string()));
-                stack.push(Exp::BinExp(Box::new(*be.clone())))
+                stack.push(Exp::BinExp(be.clone()))
             }
             (None, Token::Arithmetic(_)) => panic!("First token is restricted to number"),
             (Some(Exp::Number(_)), Token::Number(_)) => panic!("Number Sequence"),
@@ -91,9 +91,9 @@ fn gen_from_exp(exp: &Exp, count: usize) -> (String, usize) {
     match exp {
         Exp::Number(s) => (format!(" %x{} = add i32 {}, 0 \n", count, s), count),
         Exp::BinExp(be) => {
-            let (lhs, cl) = gen_from_exp(&be.as_ref().lhs, count);
-            let (rhs, cr) = gen_from_exp(&be.as_ref().rhs, cl + 1);
-            let op = match be.as_ref().op {
+            let (lhs, cl) = gen_from_exp(&be.lhs, count);
+            let (rhs, cr) = gen_from_exp(&be.rhs, cl + 1);
+            let op = match be.op {
                 BinOp::Plus => "add",
                 BinOp::Minus => "sub",
             };
