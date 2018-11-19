@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::io::{self, Read};
 
 enum Token {
@@ -67,25 +66,25 @@ fn comp_bexpr(bexpl: &mut Box<BinExp>, rhs: Exp) {
 }
 
 fn make_ast(mut tokens: Vec<Token>) -> Ast {
-    let mut stack: VecDeque<Exp> = VecDeque::new();
+    let mut stack: Vec<Exp> = Vec::new();
     for t in tokens.iter_mut() {
-        match (stack.pop_back(), t) {
-            (None, Token::Number(s)) => stack.push_back(Exp::Number(s.to_string())),
+        match (stack.pop(), t) {
+            (None, Token::Number(s)) => stack.push(Exp::Number(s.to_string())),
             (Some(ref exp), Token::Arithmetic(s)) => match s.as_str() {
-                "+" => stack.push_back(make_bexpl(exp, BinOp::Plus)),
-                "-" => stack.push_back(make_bexpl(exp, BinOp::Minus)),
+                "+" => stack.push(make_bexpl(exp, BinOp::Plus)),
+                "-" => stack.push(make_bexpl(exp, BinOp::Minus)),
                 _ => panic!("Undefined arithmetic operator"),
             },
             (Some(Exp::BinExp(ref mut be)), Token::Number(s)) => {
                 comp_bexpr(be, Exp::Number(s.to_string()));
-                stack.push_back(Exp::BinExp(Box::new(*be.clone())))
+                stack.push(Exp::BinExp(Box::new(*be.clone())))
             }
             (None, Token::Arithmetic(_)) => panic!("First token is restricted to number"),
             (Some(Exp::Number(_)), Token::Number(_)) => panic!("Number Sequence"),
             (Some(Exp::Undefined), _) => unreachable!(),
         }
     }
-    Ast::Exp(stack.pop_back().unwrap())
+    Ast::Exp(stack.pop().unwrap())
 }
 
 fn gen_from_exp(exp: &Exp, count: usize) -> (String, usize) {
