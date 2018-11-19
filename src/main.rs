@@ -1,8 +1,34 @@
+use std::collections::VecDeque;
 use std::io::{self, Read};
 
 enum Token {
     Number(String),
     Arithmetic(String),
+}
+
+#[derive(Debug)]
+enum Ast {
+    Exp(Exp),
+}
+
+#[derive(Debug, Clone)]
+enum Exp {
+    BinExp(Box<BinExp>),
+    Number(String),
+    Undefined,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum BinOp {
+    Plus,
+    Minus,
+}
+
+#[derive(Debug, Clone)]
+struct BinExp {
+    lhs: Box<Exp>,
+    op: BinOp,
+    rhs: Box<Exp>,
 }
 
 fn tokenize(buf: &str) -> Vec<Token> {
@@ -28,33 +54,73 @@ fn tokenize(buf: &str) -> Vec<Token> {
     res
 }
 
-fn gen(tokens: &Vec<Token>) -> String {
-    let mut res: String;
-    let l = tokens.len();
-    res = "define i32 @main() {{\n".to_string();
-    for (i, t) in tokens.into_iter().enumerate() {
-        if i == 0 {
-            if let Token::Number(s) = t {
-                res += &format!(" %x0 = add i32 {}, 0 \n", s);
+fn make_bexpl(lhs: &Exp, op: BinOp) -> Exp {
+    Exp::BinExp(Box::new(BinExp {
+        lhs: Box::new(lhs.clone()),
+        op: op,
+        rhs: Box::new(Exp::Undefined),
+    }))
+}
+
+fn comp_bexpr(bexpl: &mut Box<BinExp>, rhs: Exp) {
+    bexpl.rhs = Box::new(rhs);
+}
+
+fn make_ast(mut tokens: Vec<Token>) -> Ast {
+    let mut stack: VecDeque<Exp> = VecDeque::new();
+    for t in tokens.iter_mut() {
+        match (stack.pop_back(), t) {
+            (None, Token::Number(s)) => stack.push_back(Exp::Number(s.to_string())),
+            (Some(ref exp), Token::Arithmetic(s)) => match s.as_str() {
+                "+" => stack.push_back(make_bexpl(exp, BinOp::Plus)),
+                "-" => stack.push_back(make_bexpl(exp, BinOp::Minus)),
+                _ => panic!("Undefined arithmetic operator"),
+            },
+            (Some(Exp::BinExp(ref mut be)), Token::Number(s)) => {
+                comp_bexpr(be, Exp::Number(s.to_string()));
+                stack.push_back(Exp::BinExp(Box::new(*be.clone())))
             }
-        } else {
-            match t {
-                Token::Arithmetic(s) => match s.as_str() {
-                    "+" => res += &format!(" %x{} = add i32 ", i + 1),
-                    "-" => res += &format!(" %x{} = sub i32 ", i + 1),
-                    _ => res += &format!(" %x{} = sub i32 ", i + 1),
-                },
-                Token::Number(s) => res += &format!("%x{}, {} \n", i - 2, s),
-            }
+            (None, Token::Arithmetic(_)) => panic!("First token is restricted to number"),
+            (Some(Exp::Number(_)), Token::Number(_)) => panic!("Number Sequence"),
+            (Some(Exp::Undefined), _) => unreachable!(),
         }
     }
-    res += &format!(" ret i32 %x{}\n}}\n", l - 1);
+    Ast::Exp(stack.pop_back().unwrap())
+}
+
+fn gen_from_exp(exp: &Exp, count: usize) -> (String, usize) {
+    match exp {
+        Exp::Number(s) => (format!(" %x{} = add i32 {}, 0 \n", count, s), count),
+        Exp::BinExp(be) => {
+            let (lhs, cl) = gen_from_exp(&be.as_ref().lhs, count);
+            let (rhs, cr) = gen_from_exp(&be.as_ref().rhs, cl + 1);
+            let op = match be.as_ref().op {
+                BinOp::Plus => "add",
+                BinOp::Minus => "sub",
+            };
+            (
+                lhs + &rhs + &format!(" %x{} = {} i32 %x{}, %x{}\n", cr + 1, op, cl, cr),
+                cr + 1,
+            )
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn gen(ast: Ast) -> String {
+    let Ast::Exp(ref exp) = ast;
+    let mut res: String;
+    res = "define i32 @main() {\n".to_string();
+    let (s, i) = gen_from_exp(exp, 0);
+    res += &s;
+    res += &format!(" ret i32 %x{}\n}}\n", i);
     res
 }
 
 fn compile_buffer(buf: &str) -> String {
     let tokens = tokenize(&buf.trim());
-    gen(&tokens)
+    let ast = make_ast(tokens);
+    gen(ast)
 }
 
 fn main() -> io::Result<()> {
