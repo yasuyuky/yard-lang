@@ -17,8 +17,14 @@ enum Exp {
     Undefined,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum BinOp {
+    PlusMinus(PlusMinus),
+    Mul,
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+enum PlusMinus {
     Plus,
     Minus,
 }
@@ -53,35 +59,63 @@ fn tokenize(buf: &str) -> Vec<Token> {
     res
 }
 
-fn make_bexpl(lhs: &Exp, op: BinOp) -> Exp {
-    Exp::BinaryOp(BinOpExp {
-        lhs: Box::new(lhs.clone()),
-        op,
-        rhs: Box::new(Exp::Undefined),
-    })
+fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
+    match lhs {
+        Exp::Number(s) => Exp::BinaryOp(BinOpExp {
+            lhs: Box::new(Exp::Number(s.to_string())),
+            op,
+            rhs: Box::new(Exp::Undefined),
+        }),
+        Exp::BinaryOp(ref mut bo) => if bo.op > op {
+            Exp::BinaryOp(BinOpExp {
+                lhs: Box::new(lhs.clone()),
+                op,
+                rhs: Box::new(Exp::Undefined),
+            })
+        } else {
+            comp_bexpr(
+                bo,
+                Exp::BinaryOp(BinOpExp {
+                    lhs: Box::new(bo.rhs.as_ref().clone()),
+                    op,
+                    rhs: Box::new(Exp::Undefined),
+                }),
+            );
+            lhs
+        },
+        Exp::Undefined => unreachable!(),
+    }
 }
 
 fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
-    bexpl.rhs = Box::new(rhs);
+    match bexpl.rhs.as_mut() {
+        Exp::BinaryOp(bo) => comp_bexpr(bo, rhs),
+        _ => bexpl.rhs = Box::new(rhs),
+    }
 }
 
 fn make_ast(mut tokens: Vec<Token>) -> Ast {
     let mut stack: Vec<Exp> = Vec::new();
     for t in tokens.iter_mut() {
-        match (stack.pop(), t) {
-            (None, Token::Number(s)) => stack.push(Exp::Number(s.to_string())),
-            (Some(ref exp), Token::Arithmetic(s)) => match s.as_str() {
-                "+" => stack.push(make_bexpl(exp, BinOp::Plus)),
-                "-" => stack.push(make_bexpl(exp, BinOp::Minus)),
-                _ => panic!("Undefined arithmetic operator"),
+        match stack.pop() {
+            Some(exp) => match t {
+                Token::Arithmetic(s) => match s.as_str() {
+                    "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Plus))),
+                    "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Minus))),
+                    "*" => stack.push(make_bexpl(exp, BinOp::Mul)),
+                    _ => panic!("Undefined arithmetic operator"),
+                },
+                Token::Number(s) => if let Exp::BinaryOp(mut bo) = exp {
+                    comp_bexpr(&mut bo, Exp::Number(s.to_string()));
+                    stack.push(Exp::BinaryOp(bo))
+                } else {
+                    panic!("Number Sequence")
+                },
             },
-            (Some(Exp::BinaryOp(ref mut bo)), Token::Number(s)) => {
-                comp_bexpr(bo, Exp::Number(s.to_string()));
-                stack.push(Exp::BinaryOp(bo.clone()))
-            }
-            (None, Token::Arithmetic(_)) => panic!("First token is restricted to number"),
-            (Some(Exp::Number(_)), Token::Number(_)) => panic!("Number Sequence"),
-            (Some(Exp::Undefined), _) => unreachable!(),
+            None => match t {
+                Token::Number(s) => stack.push(Exp::Number(s.to_string())),
+                _ => panic!("First token is restricted to number"),
+            },
         }
     }
     Ast::Exp(stack.pop().unwrap())
@@ -94,8 +128,9 @@ fn gen_from_exp(exp: &Exp, no: usize) -> (String, usize) {
             let (lhs, ln) = gen_from_exp(&bo.lhs, no);
             let (rhs, rn) = gen_from_exp(&bo.rhs, ln + 1);
             let op = match bo.op {
-                BinOp::Plus => "add",
-                BinOp::Minus => "sub",
+                BinOp::PlusMinus(PlusMinus::Plus) => "add",
+                BinOp::PlusMinus(PlusMinus::Minus) => "sub",
+                BinOp::Mul => "mul",
             };
             let s = format!(" %{} = {} i32 %{}, %{}\n", rn + 1, op, ln, rn);
             (lhs + &rhs + &s, rn + 1)
