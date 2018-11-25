@@ -66,21 +66,14 @@ fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
             op,
             rhs: Box::new(Exp::Undefined),
         }),
-        Exp::BinaryOp(ref mut bo) => if bo.op > op {
+        Exp::BinaryOp(ref mut bo) => if bo.op >= op {
             Exp::BinaryOp(BinOpExp {
                 lhs: Box::new(lhs.clone()),
                 op,
                 rhs: Box::new(Exp::Undefined),
             })
         } else {
-            comp_bexpr(
-                bo,
-                Exp::BinaryOp(BinOpExp {
-                    lhs: Box::new(bo.rhs.as_ref().clone()),
-                    op,
-                    rhs: Box::new(Exp::Undefined),
-                }),
-            );
+            bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
             lhs
         },
         Exp::Undefined => unreachable!(),
