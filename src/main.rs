@@ -145,6 +145,9 @@ fn gen(ast: Ast) -> String {
 fn compile_buffer(buf: &str) -> String {
     let tokens = tokenize(&buf.trim());
     let ast = make_ast(tokens);
+    for l in format!("{:#?}", ast).lines() {
+        println!("; {}", l);
+    }
     gen(ast)
 }
 
