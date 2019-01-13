@@ -20,6 +20,7 @@ enum Exp {
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum BinOp {
     PlusMinus(PlusMinus),
+    Div,
     Mul,
 }
 
@@ -96,6 +97,7 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Plus))),
                     "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Minus))),
                     "*" => stack.push(make_bexpl(exp, BinOp::Mul)),
+                    "/" => stack.push(make_bexpl(exp, BinOp::Div)),
                     _ => panic!("Undefined arithmetic operator"),
                 },
                 Token::Number(s) => if let Exp::BinaryOp(mut bo) = exp {
@@ -124,6 +126,7 @@ fn gen_from_exp(exp: &Exp, no: usize) -> (String, usize) {
                 BinOp::PlusMinus(PlusMinus::Plus) => "add",
                 BinOp::PlusMinus(PlusMinus::Minus) => "sub",
                 BinOp::Mul => "mul",
+                BinOp::Div => "udiv",
             };
             let s = format!(" %{} = {} i32 %{}, %{}\n", rn + 1, op, ln, rn);
             (lhs + &rhs + &s, rn + 1)
