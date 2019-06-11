@@ -145,12 +145,16 @@ fn gen(ast: Ast) -> String {
     res
 }
 
-fn compile_buffer(buf: &str) -> String {
-    let tokens = tokenize(&buf.trim());
-    let ast = make_ast(tokens);
+fn dump_ast_comment(ast: &Ast) {
     for l in format!("{:#?}", ast).lines() {
         println!("; {}", l);
     }
+}
+
+fn compile_buffer(buf: &str) -> String {
+    let tokens = tokenize(&buf.trim());
+    let ast = make_ast(tokens);
+    dump_ast_comment(&ast);
     gen(ast)
 }
 
