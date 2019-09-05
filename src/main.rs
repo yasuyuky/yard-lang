@@ -67,16 +67,18 @@ fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
             op,
             rhs: Box::new(Exp::Undefined),
         }),
-        Exp::BinaryOp(ref mut bo) => if bo.op >= op {
-            Exp::BinaryOp(BinOpExp {
-                lhs: Box::new(lhs.clone()),
-                op,
-                rhs: Box::new(Exp::Undefined),
-            })
-        } else {
-            bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
-            lhs
-        },
+        Exp::BinaryOp(ref mut bo) => {
+            if bo.op >= op {
+                Exp::BinaryOp(BinOpExp {
+                    lhs: Box::new(lhs.clone()),
+                    op,
+                    rhs: Box::new(Exp::Undefined),
+                })
+            } else {
+                bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
+                lhs
+            }
+        }
         Exp::Undefined => unreachable!(),
     }
 }
@@ -100,12 +102,14 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     "/" => stack.push(make_bexpl(exp, BinOp::Div)),
                     _ => panic!("Undefined arithmetic operator"),
                 },
-                Token::Number(s) => if let Exp::BinaryOp(mut bo) = exp {
-                    comp_bexpr(&mut bo, Exp::Number(s.to_string()));
-                    stack.push(Exp::BinaryOp(bo))
-                } else {
-                    panic!("Number Sequence")
-                },
+                Token::Number(s) => {
+                    if let Exp::BinaryOp(mut bo) = exp {
+                        comp_bexpr(&mut bo, Exp::Number(s.to_string()));
+                        stack.push(Exp::BinaryOp(bo))
+                    } else {
+                        panic!("Number Sequence")
+                    }
+                }
             },
             None => match t {
                 Token::Number(s) => stack.push(Exp::Number(s.to_string())),
