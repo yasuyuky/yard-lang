@@ -3,8 +3,7 @@ try() {
   expected="$1"
   input="$2"
 
-  echo "$input" | ./target/debug/yard-lang > tmp.ll
-  clang -Wno-override-module -o tmp tmp.ll
+  echo "$input" | ./target/debug/yard-lang | tee tmp.ll | clang -Wno-override-module -o tmp -x ir -
   ./tmp
   actual="$?"
 
