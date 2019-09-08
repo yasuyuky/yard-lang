@@ -20,14 +20,19 @@ enum Exp {
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum BinOp {
     PlusMinus(PlusMinus),
-    Div,
-    Mul,
+    MulDiv(MulDiv)
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum PlusMinus {
     Plus,
     Minus,
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+enum MulDiv {
+    Mul,
+    Div,
 }
 
 #[derive(Debug, Clone)]
@@ -98,8 +103,8 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
                 Token::Arithmetic(s) => match s.as_str() {
                     "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Plus))),
                     "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Minus))),
-                    "*" => stack.push(make_bexpl(exp, BinOp::Mul)),
-                    "/" => stack.push(make_bexpl(exp, BinOp::Div)),
+                    "*" => stack.push(make_bexpl(exp, BinOp::MulDiv(MulDiv::Mul))),
+                    "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(MulDiv::Div))),
                     _ => panic!("Undefined arithmetic operator"),
                 },
                 Token::Number(s) => {
@@ -129,8 +134,8 @@ fn gen_from_exp(exp: &Exp, no: usize) -> (String, usize) {
             let op = match bo.op {
                 BinOp::PlusMinus(PlusMinus::Plus) => "add",
                 BinOp::PlusMinus(PlusMinus::Minus) => "sub",
-                BinOp::Mul => "mul",
-                BinOp::Div => "udiv",
+                BinOp::MulDiv(MulDiv::Mul) => "mul",
+                BinOp::MulDiv(MulDiv::Div) => "udiv",
             };
             let s = format!(" %{} = {} i32 %{}, %{}\n", rn + 1, op, ln, rn);
             (lhs + &rhs + &s, rn + 1)
