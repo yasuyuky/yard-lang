@@ -1,5 +1,7 @@
-use std::cmp::Ordering;
 use std::io::{self, Read};
+
+mod exps;
+use exps::*;
 
 enum Token {
     Number(String),
@@ -9,60 +11,6 @@ enum Token {
 #[derive(Debug)]
 enum Ast {
     Exp(Exp),
-}
-
-#[derive(Debug, Clone)]
-enum Exp {
-    BinaryOp(BinOpExp),
-    Number(String),
-    Undefined,
-}
-
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
-enum BinOp {
-    PlusMinus(PlusMinus),
-    MulDiv(MulDiv),
-}
-
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
-enum PlusMinus {
-    Plus,
-    Minus,
-}
-
-#[derive(Debug, Clone, Copy)]
-enum MulDiv {
-    Mul,
-    Div,
-}
-
-impl PartialOrd for MulDiv {
-    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
-        Some(Ordering::Equal)
-    }
-}
-
-impl PartialEq for MulDiv {
-    fn eq(&self, _: &Self) -> bool {
-        true
-    }
-}
-
-#[derive(Debug, Clone)]
-struct BinOpExp {
-    lhs: Box<Exp>,
-    op: BinOp,
-    rhs: Box<Exp>,
-}
-
-impl BinOpExp {
-    fn new(lhs: Exp, op: BinOp, rhs: Exp) -> Self {
-        BinOpExp {
-            lhs: Box::new(lhs),
-            op,
-            rhs: Box::new(rhs),
-        }
-    }
 }
 
 fn tokenize(buf: &str) -> Vec<Token> {
