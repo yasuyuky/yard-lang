@@ -38,11 +38,11 @@ fn tokenize(buf: &str) -> Vec<Token> {
 
 fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
     match lhs {
-        Exp::Number(s) => Exp::BinaryOp(BinOpExp {
-            lhs: Box::new(Exp::Number(s.to_string())),
+        Exp::Number(s) => Exp::BinaryOp(BinOpExp::new(
+            Exp::Number(s.to_string()),
             op,
-            rhs: Box::new(Exp::Undefined),
-        }),
+            Exp::Undefined,
+        )),
         Exp::BinaryOp(ref mut bo) => {
             if bo.op >= op {
                 Exp::BinaryOp(BinOpExp::new(lhs, op, Exp::Undefined))
