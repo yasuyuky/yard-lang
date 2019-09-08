@@ -42,6 +42,16 @@ struct BinOpExp {
     rhs: Box<Exp>,
 }
 
+impl BinOpExp {
+    fn new(lhs: Exp, op: BinOp, rhs: Exp) -> Self {
+        BinOpExp {
+            lhs: Box::new(lhs),
+            op,
+            rhs: Box::new(rhs),
+        }
+    }
+}
+
 fn tokenize(buf: &str) -> Vec<Token> {
     let mut res: Vec<Token> = vec![];
     for c in buf.chars() {
@@ -74,11 +84,7 @@ fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
         }),
         Exp::BinaryOp(ref mut bo) => {
             if bo.op >= op {
-                Exp::BinaryOp(BinOpExp {
-                    lhs: Box::new(lhs.clone()),
-                    op,
-                    rhs: Box::new(Exp::Undefined),
-                })
+                Exp::BinaryOp(BinOpExp::new(lhs, op, Exp::Undefined))
             } else {
                 bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
                 lhs
