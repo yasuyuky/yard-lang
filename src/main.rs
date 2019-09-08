@@ -90,11 +90,7 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
 
 fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
     match exp {
-        Exp::Num(s) => (
-            format!(" %{} = add i32 {}, 0 \n", no, s),
-            format!("%{}", no),
-            no + 1,
-        ),
+        Exp::Num(s) => (String::new(), s.to_string(), no),
         Exp::BinOp(bo) => {
             let (lhs, lr, ln) = gen_from_exp(&bo.lhs, no);
             let (rhs, rr, rn) = gen_from_exp(&bo.rhs, ln);
