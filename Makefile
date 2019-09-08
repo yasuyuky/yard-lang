@@ -5,4 +5,4 @@ target/debug/yard-lang: src/main.rs
 .PHONY:	test
 
 test:target/debug/yard-lang
-	sh ./test.sh
+	cargo test
