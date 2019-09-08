@@ -1,5 +1,21 @@
 use std::cmp::Ordering;
 
+macro_rules! eq_enum {
+    ($EnumName:ident) => {
+        impl PartialOrd for $EnumName {
+            fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
+                Some(Ordering::Equal)
+            }
+        }
+
+        impl PartialEq for $EnumName {
+            fn eq(&self, _: &Self) -> bool {
+                true
+            }
+        }
+    };
+}
+
 #[derive(Debug, Clone)]
 pub enum Exp {
     BinaryOp(BinOpExp),
@@ -25,17 +41,7 @@ pub enum MulDiv {
     Div,
 }
 
-impl PartialOrd for MulDiv {
-    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
-        Some(Ordering::Equal)
-    }
-}
-
-impl PartialEq for MulDiv {
-    fn eq(&self, _: &Self) -> bool {
-        true
-    }
-}
+eq_enum!(MulDiv);
 
 #[derive(Debug, Clone)]
 pub struct BinOpExp {
