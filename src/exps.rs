@@ -7,7 +7,6 @@ macro_rules! eq_enum {
                 Some(Ordering::Equal)
             }
         }
-
         impl PartialEq for $EnumName {
             fn eq(&self, _: &Self) -> bool {
                 true
@@ -20,7 +19,7 @@ macro_rules! eq_enum {
 pub enum Exp {
     BinOp(BinOpExp),
     Num(String),
-    Undefined,
+    Undef,
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
