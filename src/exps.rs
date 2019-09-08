@@ -18,8 +18,8 @@ macro_rules! eq_enum {
 
 #[derive(Debug, Clone)]
 pub enum Exp {
-    BinaryOp(BinOpExp),
-    Number(String),
+    BinOp(BinOpExp),
+    Num(String),
     Undefined,
 }
 

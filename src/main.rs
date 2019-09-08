@@ -38,14 +38,10 @@ fn tokenize(buf: &str) -> Vec<Token> {
 
 fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
     match lhs {
-        Exp::Number(s) => Exp::BinaryOp(BinOpExp::new(
-            Exp::Number(s.to_string()),
-            op,
-            Exp::Undefined,
-        )),
-        Exp::BinaryOp(ref mut bo) => {
+        Exp::Num(s) => Exp::BinOp(BinOpExp::new(Exp::Num(s.to_string()), op, Exp::Undefined)),
+        Exp::BinOp(ref mut bo) => {
             if bo.op >= op {
-                Exp::BinaryOp(BinOpExp::new(lhs, op, Exp::Undefined))
+                Exp::BinOp(BinOpExp::new(lhs, op, Exp::Undefined))
             } else {
                 bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
                 lhs
@@ -57,7 +53,7 @@ fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
 
 fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
     match bexpl.rhs.as_mut() {
-        Exp::BinaryOp(bo) => comp_bexpr(bo, rhs),
+        Exp::BinOp(bo) => comp_bexpr(bo, rhs),
         _ => bexpl.rhs = Box::new(rhs),
     }
 }
@@ -75,16 +71,16 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     _ => panic!("Undefined arithmetic operator"),
                 },
                 Token::Number(s) => {
-                    if let Exp::BinaryOp(mut bo) = exp {
-                        comp_bexpr(&mut bo, Exp::Number(s.to_string()));
-                        stack.push(Exp::BinaryOp(bo))
+                    if let Exp::BinOp(mut bo) = exp {
+                        comp_bexpr(&mut bo, Exp::Num(s.to_string()));
+                        stack.push(Exp::BinOp(bo))
                     } else {
                         panic!("Number Sequence")
                     }
                 }
             },
             None => match t {
-                Token::Number(s) => stack.push(Exp::Number(s.to_string())),
+                Token::Number(s) => stack.push(Exp::Num(s.to_string())),
                 _ => panic!("First token is restricted to number"),
             },
         }
@@ -94,8 +90,8 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
 
 fn gen_from_exp(exp: &Exp, no: usize) -> (String, usize) {
     match exp {
-        Exp::Number(s) => (format!(" %{} = add i32 {}, 0 \n", no, s), no),
-        Exp::BinaryOp(bo) => {
+        Exp::Num(s) => (format!(" %{} = add i32 {}, 0 \n", no, s), no),
+        Exp::BinOp(bo) => {
             let (lhs, ln) = gen_from_exp(&bo.lhs, no);
             let (rhs, rn) = gen_from_exp(&bo.rhs, ln + 1);
             let op = match bo.op {
