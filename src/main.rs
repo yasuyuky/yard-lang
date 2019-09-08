@@ -20,7 +20,7 @@ enum Exp {
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum BinOp {
     PlusMinus(PlusMinus),
-    MulDiv(MulDiv)
+    MulDiv(MulDiv),
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
