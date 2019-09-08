@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io::{self, Read};
 
 enum Token {
@@ -29,10 +30,22 @@ enum PlusMinus {
     Minus,
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 enum MulDiv {
     Mul,
     Div,
+}
+
+impl PartialOrd for MulDiv {
+    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
+        Some(Ordering::Equal)
+    }
+}
+
+impl PartialEq for MulDiv {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
 }
 
 #[derive(Debug, Clone)]
