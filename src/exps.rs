@@ -29,11 +29,13 @@ pub enum BinOp {
     MulDiv(MulDiv),
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum PlusMinus {
     Plus,
     Minus,
 }
+
+eq_enum!(PlusMinus);
 
 #[derive(Debug, Clone, Copy)]
 pub enum MulDiv {
