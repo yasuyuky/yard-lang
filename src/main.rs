@@ -88,20 +88,24 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
     Ast::Exp(stack.pop().unwrap())
 }
 
-fn gen_from_exp(exp: &Exp, no: usize) -> (String, usize) {
+fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
     match exp {
-        Exp::Num(s) => (format!(" %{} = add i32 {}, 0 \n", no, s), no),
+        Exp::Num(s) => (
+            format!(" %{} = add i32 {}, 0 \n", no, s),
+            format!("%{}", no),
+            no + 1,
+        ),
         Exp::BinOp(bo) => {
-            let (lhs, ln) = gen_from_exp(&bo.lhs, no);
-            let (rhs, rn) = gen_from_exp(&bo.rhs, ln + 1);
+            let (lhs, lr, ln) = gen_from_exp(&bo.lhs, no);
+            let (rhs, rr, rn) = gen_from_exp(&bo.rhs, ln);
             let op = match bo.op {
                 BinOp::PlusMinus(PlusMinus::Plus) => "add",
                 BinOp::PlusMinus(PlusMinus::Minus) => "sub",
                 BinOp::MulDiv(MulDiv::Mul) => "mul",
                 BinOp::MulDiv(MulDiv::Div) => "udiv",
             };
-            let s = format!(" %{} = {} i32 %{}, %{}\n", rn + 1, op, ln, rn);
-            (lhs + &rhs + &s, rn + 1)
+            let s = format!(" %{} = {} i32 {}, {}\n", rn, op, lr, rr);
+            (lhs + &rhs + &s, format!("%{}", rn), rn + 1)
         }
         _ => unreachable!(),
     }
@@ -111,9 +115,9 @@ fn gen(ast: Ast) -> String {
     let Ast::Exp(ref exp) = ast;
     let mut res: String;
     res = "define i32 @main() {\n".to_string();
-    let (s, i) = gen_from_exp(exp, 1);
+    let (s, r, _) = gen_from_exp(exp, 1);
     res += &s;
-    res += &format!(" ret i32 %{}\n}}\n", i);
+    res += &format!(" ret i32 {}\n}}\n", r);
     res
 }
 
