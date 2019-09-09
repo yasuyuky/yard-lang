@@ -60,3 +60,25 @@ impl BinOpExp {
         }
     }
 }
+
+pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
+    match lhs {
+        Exp::Num(s) => Exp::BinOp(BinOpExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
+        Exp::BinOp(ref mut bo) => {
+            if bo.op >= op {
+                Exp::BinOp(BinOpExp::new(lhs, op, Exp::Undef))
+            } else {
+                bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
+                lhs
+            }
+        }
+        Exp::Undef => unreachable!(),
+    }
+}
+
+pub fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
+    match bexpl.rhs.as_mut() {
+        Exp::BinOp(bo) => comp_bexpr(bo, rhs),
+        _ => bexpl.rhs = Box::new(rhs),
+    }
+}
