@@ -24,25 +24,25 @@ pub enum Exp {
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub enum BinOp {
-    PlusMinus(PlusMinus),
-    MulDiv(MulDiv),
+    PlusMinus(Additive),
+    MulDiv(Multitive),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum PlusMinus {
+pub enum Additive {
     Plus,
     Minus,
 }
 
-eq_enum!(PlusMinus);
+eq_enum!(Additive);
 
 #[derive(Debug, Clone, Copy)]
-pub enum MulDiv {
+pub enum Multitive {
     Mul,
     Div,
 }
 
-eq_enum!(MulDiv);
+eq_enum!(Multitive);
 
 #[derive(Debug, Clone)]
 pub struct BinOpExp {

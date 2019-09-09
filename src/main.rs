@@ -64,10 +64,10 @@ fn make_ast(mut tokens: Vec<Token>) -> Ast {
         match stack.pop() {
             Some(exp) => match t {
                 Token::Arithmetic(s) => match s.as_str() {
-                    "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Plus))),
-                    "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(PlusMinus::Minus))),
-                    "*" => stack.push(make_bexpl(exp, BinOp::MulDiv(MulDiv::Mul))),
-                    "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(MulDiv::Div))),
+                    "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(Additive::Plus))),
+                    "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(Additive::Minus))),
+                    "*" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Mul))),
+                    "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Div))),
                     _ => panic!("Undefined arithmetic operator"),
                 },
                 Token::Number(s) => {
@@ -95,10 +95,10 @@ fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
             let (lhs, lr, ln) = gen_from_exp(&bo.lhs, no);
             let (rhs, rr, rn) = gen_from_exp(&bo.rhs, ln);
             let op = match bo.op {
-                BinOp::PlusMinus(PlusMinus::Plus) => "add",
-                BinOp::PlusMinus(PlusMinus::Minus) => "sub",
-                BinOp::MulDiv(MulDiv::Mul) => "mul",
-                BinOp::MulDiv(MulDiv::Div) => "udiv",
+                BinOp::PlusMinus(Additive::Plus) => "add",
+                BinOp::PlusMinus(Additive::Minus) => "sub",
+                BinOp::MulDiv(Multitive::Mul) => "mul",
+                BinOp::MulDiv(Multitive::Div) => "udiv",
             };
             let s = format!(" %{} = {} i32 {}, {}\n", rn, op, lr, rr);
             (lhs + &rhs + &s, format!("%{}", rn), rn + 1)
