@@ -43,6 +43,7 @@ mod test {
         ];
         for (input, result) in test_sets {
             let ir = compile_buffer(&input);
+            eprintln!("{}", ir);
             let mut clang = Command::new("clang")
                 .args(&["-Wno-override-module", "-o", "tmp", "-x", "ir", "-"])
                 .stdin(Stdio::piped())
