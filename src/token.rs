@@ -44,7 +44,7 @@ fn split_to_raw_tokens(buf: &str) -> Vec<(CharType, Vec<char>)> {
             }
         };
     }
-    return ret;
+    ret
 }
 
 pub fn tokenize(buf: &str) -> Vec<Token> {
