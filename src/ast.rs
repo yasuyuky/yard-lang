@@ -3,7 +3,7 @@ use crate::token::Token;
 
 #[derive(Debug)]
 pub enum Ast {
-    Exp(Exp),
+    Stmt(Vec<Exp>),
 }
 
 pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
@@ -19,14 +19,14 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Div))),
                     _ => panic!("Undefined arithmetic operator"),
                 },
-                Token::Number(s) => {
-                    if let Exp::BinOp(mut bo) = exp {
+                Token::Number(s) => match exp {
+                    Exp::BinOp(mut bo) => {
                         comp_bexpr(&mut bo, Exp::Num(s.to_string()));
                         stack.push(Exp::BinOp(bo))
-                    } else {
-                        panic!("Number Sequence")
                     }
-                }
+                    Exp::Undef => stack.push(Exp::Num(s.to_string())),
+                    _ => panic!("Number Sequence"),
+                },
             },
             None => match t {
                 Token::Number(s) => stack.push(Exp::Num(s.to_string())),
@@ -34,7 +34,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             },
         }
     }
-    Ast::Exp(stack.pop().unwrap())
+    Ast::Stmt(stack)
 }
 
 pub fn dump_ast_comment(ast: &Ast) {

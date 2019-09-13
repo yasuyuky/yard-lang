@@ -21,11 +21,17 @@ pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
 }
 
 pub fn gen(ast: Ast) -> String {
-    let Ast::Exp(ref exp) = ast;
+    let Ast::Stmt(ref exps) = ast;
     let mut res: String;
     res = "define i32 @main() {\n".to_string();
-    let (s, r, _) = gen_from_exp(exp, 1);
-    res += &s;
-    res += &format!(" ret i32 {}\n}}\n", r);
+    let mut no = 1;
+    let mut last = String::new();
+    for exp in exps {
+        let (s, r, n) = gen_from_exp(exp, no);
+        no = n;
+        res += &s;
+        last = r;
+    }
+    res += &format!(" ret i32 {}\n}}\n", last);
     res
 }
