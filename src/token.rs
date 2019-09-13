@@ -42,7 +42,7 @@ fn split_to_raw_tokens(buf: &str) -> Vec<(CharType, Vec<char>)> {
                     ret.push((CharType::from(&c), vec![c]))
                 }
             }
-        };
+        }
     }
     ret
 }
