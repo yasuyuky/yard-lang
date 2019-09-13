@@ -17,6 +17,10 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(Additive::Minus))),
                     "*" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Mul))),
                     "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Div))),
+                    ";" => {
+                        stack.push(exp);
+                        stack.push(Exp::Undef)
+                    }
                     _ => panic!("Undefined arithmetic operator"),
                 },
                 Token::Number(s) => match exp {
