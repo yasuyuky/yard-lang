@@ -12,7 +12,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
         eprintln!("{:?}", stack);
         match stack.pop() {
             Some(exp) => match t {
-                Token::Arithmetic(s) => match s.as_str() {
+                Token::Operator(s) => match s.as_str() {
                     "+" => stack.push(make_bexpl(exp, BinOp::PlusMinus(Additive::Plus))),
                     "-" => stack.push(make_bexpl(exp, BinOp::PlusMinus(Additive::Minus))),
                     "*" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Mul))),
