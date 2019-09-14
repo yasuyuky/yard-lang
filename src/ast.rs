@@ -29,7 +29,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                         stack.push(Exp::BinOp(bo))
                     }
                     Exp::Undef => stack.push(Exp::Num(s.to_string())),
-                    _ => panic!("Number Sequence"),
+                    _ => panic!("Unknown Syntax"),
                 },
             },
             None => unreachable!(),
