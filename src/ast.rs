@@ -31,6 +31,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     Exp::Undef => stack.push(Exp::Num(s.to_string())),
                     _ => panic!("Unknown Syntax"),
                 },
+                _ => {},
             },
             None => unreachable!(),
         }
