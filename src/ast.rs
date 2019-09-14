@@ -7,7 +7,7 @@ pub enum Ast {
 }
 
 pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
-    let mut stack: Vec<Exp> = Vec::new();
+    let mut stack: Vec<Exp> = vec![Exp::Undef];
     for t in tokens.iter_mut() {
         eprintln!("{:?}", stack);
         match stack.pop() {
@@ -32,10 +32,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     _ => panic!("Number Sequence"),
                 },
             },
-            None => match t {
-                Token::Number(s) => stack.push(Exp::Num(s.to_string())),
-                _ => panic!("First token is restricted to number"),
-            },
+            None => unreachable!(),
         }
     }
     Ast::Stmt(stack)
