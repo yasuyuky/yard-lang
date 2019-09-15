@@ -28,10 +28,25 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                         comp_bexpr(&mut bo, Exp::Num(s.to_string()));
                         stack.push(Exp::BinOp(bo))
                     }
+                    Exp::Subst(subst) => stack.push(Exp::Subst(Substitution {
+                        ident: subst.ident,
+                        rhs: Box::new(Exp::Num(s.to_string())),
+                    })),
                     Exp::Undef => stack.push(Exp::Num(s.to_string())),
                     _ => panic!("Unknown Syntax"),
                 },
-                _ => {},
+                Token::Ident(s) => match exp {
+                    Exp::BinOp(mut bo) => {
+                        comp_bexpr(&mut bo, Exp::Ident(s.to_string()));
+                        stack.push(Exp::BinOp(bo))
+                    }
+                    Exp::Subst(subst) => stack.push(Exp::Subst(Substitution {
+                        ident: subst.ident,
+                        rhs: Box::new(Exp::Ident(s.to_string())),
+                    })),
+                    Exp::Undef => stack.push(Exp::Ident(s.to_string())),
+                    _ => panic!("Invalid"),
+                },
             },
             None => unreachable!(),
         }

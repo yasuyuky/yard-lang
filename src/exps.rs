@@ -19,6 +19,8 @@ macro_rules! eq_enum {
 pub enum Exp {
     BinOp(BinOpExp),
     Num(String),
+    Ident(String),
+    Subst(Substitution),
     Undef,
 }
 
@@ -43,6 +45,19 @@ pub enum Multitive {
 }
 
 eq_enum!(Multitive);
+
+#[derive(Debug, Clone)]
+pub struct Substitution {
+    pub ident: String,
+    pub rhs: Box<Exp>,
+}
+
+pub fn make_subst(ident: &str) -> Exp {
+    Exp::Subst(Substitution {
+        ident: ident.to_string(),
+        rhs: Box::new(Exp::Undef),
+    })
+}
 
 #[derive(Debug, Clone)]
 pub struct BinOpExp {
@@ -72,6 +87,8 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
                 lhs
             }
         }
+        Exp::Ident(s) => Exp::BinOp(BinOpExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
+        Exp::Subst(_) => unreachable!(),
         Exp::Undef => unreachable!(),
     }
 }
