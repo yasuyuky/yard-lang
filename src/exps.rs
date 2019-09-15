@@ -88,7 +88,10 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
             }
         }
         Exp::Ident(s) => Exp::BinOp(BinOpExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
-        Exp::Subst(_) => unreachable!(),
+        Exp::Subst(subst) => Exp::Subst(Substitution {
+            ident: subst.ident,
+            rhs: Box::new(make_bexpl(subst.rhs.as_ref().clone(), op)),
+        }),
         Exp::Undef => unreachable!(),
     }
 }
