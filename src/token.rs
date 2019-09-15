@@ -3,7 +3,7 @@ use std::iter::FromIterator;
 pub enum Token {
     Number(String),
     Operator(String),
-    Ident(String)
+    Ident(String),
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
