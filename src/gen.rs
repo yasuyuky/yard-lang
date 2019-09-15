@@ -16,6 +16,17 @@ pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
             let s = format!(" %{} = {} i32 {}, {}\n", rn, op, lr, rr);
             (lhs + &rhs + &s, format!("%{}", rn), rn + 1)
         }
+        Exp::Ident(s) => (
+            format!(" %{} = load i32, i32* %{} \n", no, s),
+            format!("%{}", no),
+            no + 1,
+        ),
+        Exp::Subst(sub) => {
+            let (rhs, rr, rn) = gen_from_exp(&sub.rhs, no);
+            let alloca = format!(" %{} = alloca i32 \n", sub.ident);
+            let store = format!(" store i32 {}, i32* %{} \n", rr, sub.ident);
+            (rhs + &alloca + &store, format!("%{}", sub.ident), rn)
+        }
         _ => unreachable!(),
     }
 }
