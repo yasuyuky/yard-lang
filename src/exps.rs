@@ -85,38 +85,40 @@ impl BinaryExp {
     }
 }
 
-pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
-    match lhs {
-        Exp::Bin(ref mut b) => {
-            if b.op >= op {
-                Exp::Bin(BinaryExp::new(lhs, op, Exp::Undef))
-            } else {
-                b.rhs = Box::new(make_bexpl(b.rhs.as_ref().clone(), op));
-                lhs
+impl Exp {
+    pub fn make_bexpl(&mut self, op: BinOp) -> Self {
+        match self {
+            Exp::Bin(ref mut b) => {
+                if b.op >= op {
+                    Exp::Bin(BinaryExp::new(self.clone(), op, Exp::Undef))
+                } else {
+                    b.rhs = Box::new(b.rhs.make_bexpl(op));
+                    self.clone()
+                }
             }
-        }
-        Exp::Assign(subst) => Exp::Assign(Assignment {
-            ident: subst.ident,
-            rhs: Box::new(make_bexpl(subst.rhs.as_ref().clone(), op)),
-        }),
-        Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
-        Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
-        Exp::Undef => unreachable!(),
-    }
-}
-
-pub fn comp_expr(exp: Exp, rhs: Exp) -> Exp {
-    match exp {
-        Exp::Bin(b) => Exp::Bin(b.set_rhs(rhs)),
-        Exp::Assign(subst) => Exp::Assign(Assignment {
-            ident: subst.ident,
-            rhs: Box::new(match subst.rhs.as_ref() {
-                Exp::Undef => rhs,
-                Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(rhs)),
-                _ => unreachable!(),
+            Exp::Assign(subst) => Exp::Assign(Assignment {
+                ident: subst.ident.clone(),
+                rhs: Box::new(subst.rhs.make_bexpl(op)),
             }),
-        }),
-        Exp::Undef => rhs,
-        _ => panic!("Unknown Syntax"),
+            Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
+            Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
+            Exp::Undef => unreachable!(),
+        }
+    }
+
+    pub fn comp_expr(&self, rhs: Exp) -> Exp {
+        match self {
+            Exp::Bin(ref b) => Exp::Bin(b.clone().set_rhs(rhs)),
+            Exp::Assign(subst) => Exp::Assign(Assignment {
+                ident: subst.ident.clone(),
+                rhs: Box::new(match subst.rhs.as_ref() {
+                    Exp::Undef => rhs,
+                    Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(rhs)),
+                    _ => unreachable!(),
+                }),
+            }),
+            Exp::Undef => rhs,
+            _ => panic!("Unknown Syntax"),
+        }
     }
 }
