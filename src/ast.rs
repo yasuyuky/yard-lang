@@ -19,7 +19,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     "/" => stack.push(make_bexpl(exp, BinOp::MulDiv(Multitive::Div))),
                     "=" => {
                         if let Exp::Ident(s) = exp {
-                            stack.push(make_subst(&s))
+                            stack.push(make_assign(&s))
                         }
                     }
                     ";" => {

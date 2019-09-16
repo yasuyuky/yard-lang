@@ -20,7 +20,7 @@ pub enum Exp {
     BinOp(BinOpExp),
     Num(String),
     Ident(String),
-    Subst(Substitution),
+    Assign(Assignment),
     Undef,
 }
 
@@ -47,13 +47,13 @@ pub enum Multitive {
 eq_enum!(Multitive);
 
 #[derive(Debug, Clone)]
-pub struct Substitution {
+pub struct Assignment {
     pub ident: String,
     pub rhs: Box<Exp>,
 }
 
-pub fn make_subst(ident: &str) -> Exp {
-    Exp::Subst(Substitution {
+pub fn make_assign(ident: &str) -> Exp {
+    Exp::Assign(Assignment {
         ident: ident.to_string(),
         rhs: Box::new(Exp::Undef),
     })
@@ -86,7 +86,7 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
                 lhs
             }
         }
-        Exp::Subst(subst) => Exp::Subst(Substitution {
+        Exp::Assign(subst) => Exp::Assign(Assignment {
             ident: subst.ident,
             rhs: Box::new(make_bexpl(subst.rhs.as_ref().clone(), op)),
         }),
@@ -110,7 +110,7 @@ pub fn comp_expr(exp: Exp, rhs: Exp) -> Exp {
             comp_bexpr(&mut bo, rhs);
             Exp::BinOp(bo)
         }
-        Exp::Subst(mut subst) => Exp::Subst(Substitution {
+        Exp::Assign(mut subst) => Exp::Assign(Assignment {
             ident: subst.ident,
             rhs: Box::new(match subst.rhs.as_mut() {
                 Exp::Undef => rhs,
