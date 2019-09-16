@@ -67,11 +67,11 @@ pub struct BinaryExp {
 }
 
 impl BinaryExp {
-    pub fn new(lhs: Exp, op: BinOp, rhs: Exp) -> Self {
+    pub fn new(lhs: Exp, op: BinOp) -> Self {
         BinaryExp {
             lhs: Box::new(lhs),
             op,
-            rhs: Box::new(rhs),
+            rhs: Box::new(Exp::Undef),
         }
     }
 
@@ -90,7 +90,7 @@ impl Exp {
         match self {
             Exp::Bin(ref mut b) => {
                 if b.op >= op {
-                    Exp::Bin(BinaryExp::new(self.clone(), op, Exp::Undef))
+                    Exp::Bin(BinaryExp::new(self.clone(), op))
                 } else {
                     b.rhs = Box::new(b.rhs.make_bexpl(op));
                     self.clone()
@@ -100,24 +100,24 @@ impl Exp {
                 ident: subst.ident.clone(),
                 rhs: Box::new(subst.rhs.make_bexpl(op)),
             }),
-            Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
-            Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
+            Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op)),
+            Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op)),
             Exp::Undef => unreachable!(),
         }
     }
 
-    pub fn comp_expr(&self, rhs: Exp) -> Exp {
+    pub fn extend(&self, exp: Exp) -> Exp {
         match self {
-            Exp::Bin(ref b) => Exp::Bin(b.clone().set_rhs(rhs)),
+            Exp::Bin(ref b) => Exp::Bin(b.clone().set_rhs(exp)),
             Exp::Assign(subst) => Exp::Assign(Assignment {
                 ident: subst.ident.clone(),
                 rhs: Box::new(match subst.rhs.as_ref() {
-                    Exp::Undef => rhs,
-                    Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(rhs)),
+                    Exp::Undef => exp,
+                    Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(exp)),
                     _ => unreachable!(),
                 }),
             }),
-            Exp::Undef => rhs,
+            Exp::Undef => exp,
             _ => panic!("Unknown Syntax"),
         }
     }

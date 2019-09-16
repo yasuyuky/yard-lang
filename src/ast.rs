@@ -28,8 +28,8 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     }
                     _ => panic!("Undefined arithmetic operator"),
                 },
-                Token::Number(s) => stack.push(exp.comp_expr(Exp::Num(s.to_string()))),
-                Token::Ident(s) => stack.push(exp.comp_expr(Exp::Ident(s.to_string()))),
+                Token::Number(s) => stack.push(exp.extend(Exp::Num(s.to_string()))),
+                Token::Ident(s) => stack.push(exp.extend(Exp::Ident(s.to_string()))),
             },
             None => unreachable!(),
         }
