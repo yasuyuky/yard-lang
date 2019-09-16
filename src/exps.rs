@@ -78,7 +78,6 @@ impl BinOpExp {
 
 pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
     match lhs {
-        Exp::Num(s) => Exp::BinOp(BinOpExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
         Exp::BinOp(ref mut bo) => {
             if bo.op >= op {
                 Exp::BinOp(BinOpExp::new(lhs, op, Exp::Undef))
@@ -87,11 +86,12 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
                 lhs
             }
         }
-        Exp::Ident(s) => Exp::BinOp(BinOpExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
         Exp::Subst(subst) => Exp::Subst(Substitution {
             ident: subst.ident,
             rhs: Box::new(make_bexpl(subst.rhs.as_ref().clone(), op)),
         }),
+        Exp::Num(s) => Exp::BinOp(BinOpExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
+        Exp::Ident(s) => Exp::BinOp(BinOpExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
         Exp::Undef => unreachable!(),
     }
 }
