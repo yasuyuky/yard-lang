@@ -28,37 +28,8 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     }
                     _ => panic!("Undefined arithmetic operator"),
                 },
-                Token::Number(s) => stack.push(match exp {
-                    Exp::BinOp(mut bo) => {
-                        comp_bexpr(&mut bo, Exp::Num(s.to_string()));
-                        Exp::BinOp(bo)
-                    }
-                    Exp::Subst(mut subst) => Exp::Subst(Substitution {
-                        ident: subst.ident,
-                        rhs: Box::new(match subst.rhs.as_mut() {
-                            Exp::Undef => Exp::Num(s.to_string()),
-                            Exp::BinOp(bo) => {
-                                comp_bexpr(bo, Exp::Num(s.to_string()));
-                                Exp::BinOp(bo.clone())
-                            }
-                            _ => unreachable!(),
-                        }),
-                    }),
-                    Exp::Undef => Exp::Num(s.to_string()),
-                    _ => panic!("Unknown Syntax"),
-                }),
-                Token::Ident(s) => stack.push(match exp {
-                    Exp::BinOp(mut bo) => {
-                        comp_bexpr(&mut bo, Exp::Ident(s.to_string()));
-                        Exp::BinOp(bo)
-                    }
-                    Exp::Subst(subst) => Exp::Subst(Substitution {
-                        ident: subst.ident,
-                        rhs: Box::new(Exp::Ident(s.to_string())),
-                    }),
-                    Exp::Undef => Exp::Ident(s.to_string()),
-                    _ => panic!("Invalid"),
-                }),
+                Token::Number(s) => stack.push(comp_expr(exp, Exp::Num(s.to_string()))),
+                Token::Ident(s) => stack.push(comp_expr(exp, Exp::Ident(s.to_string()))),
             },
             None => unreachable!(),
         }

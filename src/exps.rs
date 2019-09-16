@@ -102,3 +102,25 @@ pub fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
         _ => bexpl.rhs = Box::new(rhs),
     }
 }
+
+pub fn comp_expr(exp: Exp, rhs: Exp) -> Exp {
+    match exp {
+        Exp::BinOp(mut bo) => {
+            comp_bexpr(&mut bo, rhs);
+            Exp::BinOp(bo)
+        }
+        Exp::Subst(mut subst) => Exp::Subst(Substitution {
+            ident: subst.ident,
+            rhs: Box::new(match subst.rhs.as_mut() {
+                Exp::Undef => rhs,
+                Exp::BinOp(bo) => {
+                    comp_bexpr(bo, rhs);
+                    Exp::BinOp(bo.clone())
+                }
+                _ => unreachable!(),
+            }),
+        }),
+        Exp::Undef => rhs,
+        _ => panic!("Unknown Syntax"),
+    }
+}
