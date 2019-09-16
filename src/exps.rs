@@ -99,7 +99,8 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
 pub fn comp_bexpr(bexpl: &mut BinOpExp, rhs: Exp) {
     match bexpl.rhs.as_mut() {
         Exp::BinOp(bo) => comp_bexpr(bo, rhs),
-        _ => bexpl.rhs = Box::new(rhs),
+        Exp::Undef => bexpl.rhs = Box::new(rhs),
+        _ => unreachable!(),
     }
 }
 
