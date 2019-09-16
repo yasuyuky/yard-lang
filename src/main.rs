@@ -43,6 +43,7 @@ mod test {
             ("1*2 ; 3*4/5", 3 * 4 / 5),
             ("a = 1; b = 2; a*b", 1 * 2),
             ("a = 1 + 2*3; b = 4; a*b*b", (1 + 2 * 3) * 4 * 4),
+            ("a = 1 + 2*3; b = 2*a; a*b", (1 + 2 * 3) * 14 ),
         ];
         for (input, result) in test_sets {
             let ir = compile_buffer(&input);
