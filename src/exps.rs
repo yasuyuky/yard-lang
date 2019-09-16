@@ -17,7 +17,7 @@ macro_rules! eq_enum {
 
 #[derive(Debug, Clone)]
 pub enum Exp {
-    BinOp(BinOpExp),
+    Bin(BinaryExp),
     Num(String),
     Ident(String),
     Assign(Assignment),
@@ -60,15 +60,15 @@ pub fn make_assign(ident: &str) -> Exp {
 }
 
 #[derive(Debug, Clone)]
-pub struct BinOpExp {
+pub struct BinaryExp {
     pub lhs: Box<Exp>,
     pub op: BinOp,
     pub rhs: Box<Exp>,
 }
 
-impl BinOpExp {
+impl BinaryExp {
     pub fn new(lhs: Exp, op: BinOp, rhs: Exp) -> Self {
-        BinOpExp {
+        BinaryExp {
             lhs: Box::new(lhs),
             op,
             rhs: Box::new(rhs),
@@ -77,7 +77,7 @@ impl BinOpExp {
 
     pub fn set_rhs(mut self, rhs: Exp) -> Self {
         self.rhs = Box::new(match self.rhs.as_mut() {
-            Exp::BinOp(bo) => Exp::BinOp(bo.clone().set_rhs(rhs)),
+            Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(rhs)),
             Exp::Undef => rhs,
             _ => unreachable!(),
         });
@@ -87,11 +87,11 @@ impl BinOpExp {
 
 pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
     match lhs {
-        Exp::BinOp(ref mut bo) => {
-            if bo.op >= op {
-                Exp::BinOp(BinOpExp::new(lhs, op, Exp::Undef))
+        Exp::Bin(ref mut b) => {
+            if b.op >= op {
+                Exp::Bin(BinaryExp::new(lhs, op, Exp::Undef))
             } else {
-                bo.rhs = Box::new(make_bexpl(bo.rhs.as_ref().clone(), op));
+                b.rhs = Box::new(make_bexpl(b.rhs.as_ref().clone(), op));
                 lhs
             }
         }
@@ -99,20 +99,20 @@ pub fn make_bexpl(mut lhs: Exp, op: BinOp) -> Exp {
             ident: subst.ident,
             rhs: Box::new(make_bexpl(subst.rhs.as_ref().clone(), op)),
         }),
-        Exp::Num(s) => Exp::BinOp(BinOpExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
-        Exp::Ident(s) => Exp::BinOp(BinOpExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
+        Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op, Exp::Undef)),
+        Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op, Exp::Undef)),
         Exp::Undef => unreachable!(),
     }
 }
 
 pub fn comp_expr(exp: Exp, rhs: Exp) -> Exp {
     match exp {
-        Exp::BinOp(bo) => Exp::BinOp(bo.set_rhs(rhs)),
+        Exp::Bin(b) => Exp::Bin(b.set_rhs(rhs)),
         Exp::Assign(subst) => Exp::Assign(Assignment {
             ident: subst.ident,
             rhs: Box::new(match subst.rhs.as_ref() {
                 Exp::Undef => rhs,
-                Exp::BinOp(bo) => Exp::BinOp(bo.clone().set_rhs(rhs)),
+                Exp::Bin(b) => Exp::Bin(b.clone().set_rhs(rhs)),
                 _ => unreachable!(),
             }),
         }),

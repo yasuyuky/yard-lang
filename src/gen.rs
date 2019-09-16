@@ -4,10 +4,10 @@ use crate::exps::*;
 pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
     match exp {
         Exp::Num(s) => (String::new(), s.to_string(), no),
-        Exp::BinOp(bo) => {
-            let (lhs, lr, ln) = gen_from_exp(&bo.lhs, no);
-            let (rhs, rr, rn) = gen_from_exp(&bo.rhs, ln);
-            let op = match bo.op {
+        Exp::Bin(b) => {
+            let (lhs, lr, ln) = gen_from_exp(&b.lhs, no);
+            let (rhs, rr, rn) = gen_from_exp(&b.rhs, ln);
+            let op = match b.op {
                 BinOp::PlusMinus(Additive::Plus) => "add",
                 BinOp::PlusMinus(Additive::Minus) => "sub",
                 BinOp::MulDiv(Multitive::Mul) => "mul",
