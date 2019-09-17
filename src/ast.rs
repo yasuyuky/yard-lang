@@ -1,5 +1,5 @@
 use crate::exps::*;
-use crate::token::Token;
+use crate::token::{Token, TokenType};
 
 #[derive(Debug)]
 pub enum Ast {
@@ -8,11 +8,11 @@ pub enum Ast {
 
 pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
     let mut stack: Vec<Exp> = vec![Exp::Undef];
-    for t in tokens.iter_mut() {
+    for Token { t, s } in tokens.iter_mut() {
         eprintln!("{:?}", stack);
         let mut exp = stack.pop().unwrap_or(Exp::Undef);
         match t {
-            Token::Operator(s) => match s.as_str() {
+            TokenType::Operator => match s.as_str() {
                 "+" => stack.push(exp.make_bexpl(BinOp::PlusMinus(Additive::Plus))),
                 "-" => stack.push(exp.make_bexpl(BinOp::PlusMinus(Additive::Minus))),
                 "*" => stack.push(exp.make_bexpl(BinOp::MulDiv(Multitive::Mul))),
@@ -28,8 +28,8 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                 }
                 _ => panic!("Undefined arithmetic operator"),
             },
-            Token::Number(s) => stack.push(exp.extend(Exp::Num(s.to_string()))),
-            Token::Ident(s) => stack.push(exp.extend(Exp::Ident(s.to_string()))),
+            TokenType::Number => stack.push(exp.extend(Exp::Num(s.to_string()))),
+            TokenType::Ident => stack.push(exp.extend(Exp::Ident(s.to_string()))),
         }
     }
     Ast::Stmt(stack)

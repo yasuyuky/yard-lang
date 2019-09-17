@@ -1,9 +1,14 @@
 use std::iter::FromIterator;
 
-pub enum Token {
-    Number(String),
-    Operator(String),
-    Ident(String),
+pub struct Token {
+    pub t: TokenType,
+    pub s: String,
+}
+
+pub enum TokenType {
+    Number,
+    Operator,
+    Ident,
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
@@ -51,12 +56,15 @@ fn split_to_raw_tokens(buf: &str) -> Vec<(CharType, Vec<char>)> {
 pub fn tokenize(buf: &str) -> Vec<Token> {
     let mut res: Vec<Token> = vec![];
     for (ty, v) in split_to_raw_tokens(buf) {
-        match ty {
-            CharType::Alphabetic => res.push(Token::Ident(String::from_iter(v.into_iter()))),
-            CharType::Digit => res.push(Token::Number(String::from_iter(v.into_iter()))),
-            CharType::Punctuation => res.push(Token::Operator(String::from_iter(v.into_iter()))),
-            _ => continue,
-        }
+        res.push(Token {
+            t: match ty {
+                CharType::Alphabetic => TokenType::Ident,
+                CharType::Digit => TokenType::Number,
+                CharType::Punctuation => TokenType::Operator,
+                _ => continue,
+            },
+            s: String::from_iter(v.into_iter()),
+        })
     }
     res
 }
