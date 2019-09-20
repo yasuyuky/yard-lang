@@ -9,6 +9,7 @@ pub enum TokenType {
     Number,
     Operator,
     Ident,
+    Keyword,
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
