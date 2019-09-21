@@ -5,11 +5,12 @@ pub struct Token {
     pub s: String,
 }
 
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub enum TokenType {
     Number,
     Operator,
     Ident,
-    Keyword,
+    Keyword(KeywordType),
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
@@ -19,6 +20,11 @@ enum CharType {
     Alphabetic,
     Punctuation,
     Unknown,
+}
+
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+pub enum KeywordType {
+    Return,
 }
 
 impl From<&char> for CharType {

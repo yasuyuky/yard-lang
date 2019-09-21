@@ -1,5 +1,5 @@
 use crate::exps::*;
-use crate::token::{Token, TokenType};
+use crate::token::{KeywordType, Token, TokenType};
 
 #[derive(Debug)]
 pub enum Ast {
@@ -30,7 +30,8 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             },
             TokenType::Number => stack.push(exp.extend(Exp::Num(s.to_string()))),
             TokenType::Ident => stack.push(exp.extend(Exp::Ident(s.to_string()))),
-            TokenType::Keyword => unreachable!(),
+            TokenType::Keyword(KeywordType::Return) => unimplemented!(),
+            _ => unreachable!(),
         }
     }
     Ast::Stmt(stack)
