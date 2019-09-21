@@ -33,7 +33,6 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             TokenType::Keyword(KeywordType::Return) => {
                 stack.push(Exp::Return(Box::new(Exp::Undef)))
             }
-            _ => unreachable!(),
         }
     }
     Ast::Stmt(stack)
