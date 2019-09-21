@@ -103,7 +103,7 @@ impl Exp {
             }),
             Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op)),
             Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op)),
-            Exp::Return(_) => unreachable!(),
+            Exp::Return(r) => Exp::Return(Box::new(r.as_mut().make_bexpl(op))),
             Exp::Undef => unreachable!(),
         }
     }

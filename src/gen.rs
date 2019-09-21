@@ -27,6 +27,11 @@ pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
             let store = format!(" store i32 {}, i32* %{} \n", rr, sub.ident);
             (rhs + &alloca + &store, format!("%{}", sub.ident), rn)
         }
+        Exp::Return(ret) => {
+            let (rhs, rr, rn) = gen_from_exp(ret.as_ref(), no);
+            let retst = &format!(" ret i32 {}\n", rr);
+            (rhs + &retst, String::new(), rn)
+        }
         _ => unimplemented!(),
     }
 }
@@ -36,13 +41,11 @@ pub fn gen(ast: Ast) -> String {
     let mut res: String;
     res = "define i32 @main() {\n".to_string();
     let mut no = 1;
-    let mut last = String::new();
     for exp in exps {
-        let (s, r, n) = gen_from_exp(exp, no);
+        let (s, _, n) = gen_from_exp(exp, no);
         no = n;
         res += &s;
-        last = r;
     }
-    res += &format!(" ret i32 {}\n}}\n", last);
+    res += "}";
     res
 }
