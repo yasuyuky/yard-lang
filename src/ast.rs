@@ -30,7 +30,9 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             },
             TokenType::Number => stack.push(exp.extend(Exp::Num(s.to_string()))),
             TokenType::Ident => stack.push(exp.extend(Exp::Ident(s.to_string()))),
-            TokenType::Keyword(KeywordType::Return) => unimplemented!(),
+            TokenType::Keyword(KeywordType::Return) => {
+                stack.push(Exp::Return(Box::new(Exp::Undef)))
+            }
             _ => unreachable!(),
         }
     }

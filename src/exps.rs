@@ -21,6 +21,7 @@ pub enum Exp {
     Num(String),
     Ident(String),
     Assign(Assignment),
+    Return(Box<Exp>),
     Undef,
 }
 
@@ -102,6 +103,7 @@ impl Exp {
             }),
             Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op)),
             Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op)),
+            Exp::Return(_) => unreachable!(),
             Exp::Undef => unreachable!(),
         }
     }
@@ -117,6 +119,7 @@ impl Exp {
                     _ => unreachable!(),
                 }),
             }),
+            Exp::Return(boxed) => Exp::Return(Box::new(boxed.clone().as_mut().extend(exp))),
             Exp::Undef => exp,
             _ => panic!("Unknown Syntax"),
         }

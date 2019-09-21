@@ -27,7 +27,7 @@ pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
             let store = format!(" store i32 {}, i32* %{} \n", rr, sub.ident);
             (rhs + &alloca + &store, format!("%{}", sub.ident), rn)
         }
-        _ => unreachable!(),
+        _ => unimplemented!(),
     }
 }
 
