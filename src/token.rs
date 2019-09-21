@@ -63,15 +63,17 @@ fn split_to_raw_tokens(buf: &str) -> Vec<(CharType, Vec<char>)> {
 pub fn tokenize(buf: &str) -> Vec<Token> {
     let mut res: Vec<Token> = vec![];
     for (ty, v) in split_to_raw_tokens(buf) {
-        res.push(Token {
-            t: match ty {
-                CharType::Alphabetic => TokenType::Ident,
-                CharType::Digit => TokenType::Number,
-                CharType::Punctuation => TokenType::Operator,
-                _ => continue,
+        let s = String::from_iter(v.into_iter());
+        let t = match ty {
+            CharType::Alphabetic => match s.as_str() {
+                "return" => TokenType::Keyword(KeywordType::Return),
+                _ => TokenType::Ident,
             },
-            s: String::from_iter(v.into_iter()),
-        })
+            CharType::Digit => TokenType::Number,
+            CharType::Punctuation => TokenType::Operator,
+            _ => continue,
+        };
+        res.push(Token { t, s })
     }
     res
 }
