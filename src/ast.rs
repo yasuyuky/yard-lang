@@ -23,7 +23,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     }
                 }
                 "(" => {
-                    stack.push(exp.clone());
+                    stack.push(exp);
                     stack.push(Exp::Undef)
                 }
                 ")" => {
@@ -31,7 +31,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     stack.push(parent.extend(Exp::Child(Box::new(exp))))
                 }
                 ";" => {
-                    stack.push(exp.clone());
+                    stack.push(exp);
                     stack.push(Exp::Undef)
                 }
                 _ => panic!("Unknown operator"),
