@@ -44,6 +44,8 @@ mod test {
             ("a = 1; b = 2; return a*b", 1 * 2),
             ("a = 1 + 2*3; b = 4; return a*b*b", (1 + 2 * 3) * 4 * 4),
             ("a = 1 + 2*3; b = 2*a; return a*b", (1 + 2 * 3) * 14),
+            ("return ( (1 + 2) * 3 + 4) * 5", ((1 + 2) * 3 + 4) * 5),
+            ("a = (1 + 2) * 3; b = a; return a*b", ((1 + 2) * 3) * 9),
         ];
         for (input, result) in test_sets {
             let ir = compile_buffer(&input);
