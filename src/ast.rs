@@ -22,6 +22,14 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                         stack.push(make_assign(&s))
                     }
                 }
+                "(" => {
+                    stack.push(exp.clone());
+                    stack.push(Exp::Undef)
+                }
+                ")" => {
+                    let parent = stack.pop().expect("parent");
+                    stack.push(parent.extend(Exp::Child(Box::new(exp))))
+                }
                 ";" => {
                     stack.push(exp.clone());
                     stack.push(Exp::Undef)

@@ -32,6 +32,7 @@ pub fn gen_from_exp(exp: &Exp, no: usize) -> (String, String, usize) {
             let retst = &format!(" ret i32 {}\n", rr);
             (rhs + &retst, String::new(), rn)
         }
+        Exp::Child(child) => gen_from_exp(child.as_ref(), no),
         _ => unimplemented!(),
     }
 }
