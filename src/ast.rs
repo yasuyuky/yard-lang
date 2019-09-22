@@ -26,7 +26,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     stack.push(exp.clone());
                     stack.push(Exp::Undef)
                 }
-                _ => panic!("Undefined arithmetic operator"),
+                _ => panic!("Unknown operator"),
             },
             TokenType::Number => stack.push(exp.extend(Exp::Num(s.to_string()))),
             TokenType::Ident => stack.push(exp.extend(Exp::Ident(s.to_string()))),
