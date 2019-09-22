@@ -9,7 +9,7 @@ pub enum Ast {
 pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
     let mut stack: Vec<Exp> = vec![Exp::Undef];
     for Token { t, s } in tokens.iter_mut() {
-        eprintln!("{:?}", stack);
+        eprintln!("{:?} <- {:?} ({:?})", stack, t, s);
         let mut exp = stack.pop().unwrap_or(Exp::Undef);
         match t {
             TokenType::Operator => match s.as_str() {
