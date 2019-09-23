@@ -33,6 +33,7 @@ enum CharType {
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub enum KeywordType {
     Return,
+    If,
 }
 
 impl From<&char> for CharType {
@@ -80,6 +81,7 @@ pub fn tokenize(buf: &str) -> Vec<Token> {
         let t = match ty {
             CharType::Alphabetic => match s.as_str() {
                 "return" => TokenType::Keyword(KeywordType::Return),
+                "if" => TokenType::Keyword(KeywordType::If),
                 _ => TokenType::Ident,
             },
             CharType::Digit => TokenType::Number,

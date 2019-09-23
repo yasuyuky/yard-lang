@@ -33,6 +33,7 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             TokenType::Keyword(KeywordType::Return) => {
                 stack.push(Exp::Return(Box::new(Exp::Undef)))
             }
+            TokenType::Keyword(KeywordType::If) => unimplemented!(),
             TokenType::Paren(Bracket::Begin) => {
                 stack.push(exp);
                 stack.push(Exp::Undef)
