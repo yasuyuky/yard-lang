@@ -13,10 +13,10 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
         let mut exp = stack.pop().unwrap_or(Exp::Undef);
         match t {
             TokenType::Operator => match s.as_str() {
-                "+" => stack.push(exp.make_bexpl(BinOp::PlusMinus(Additive::Plus))),
-                "-" => stack.push(exp.make_bexpl(BinOp::PlusMinus(Additive::Minus))),
-                "*" => stack.push(exp.make_bexpl(BinOp::MulDiv(Multitive::Mul))),
-                "/" => stack.push(exp.make_bexpl(BinOp::MulDiv(Multitive::Div))),
+                "+" => stack.push(exp.binary(BinOp::PlusMinus(Additive::Plus))),
+                "-" => stack.push(exp.binary(BinOp::PlusMinus(Additive::Minus))),
+                "*" => stack.push(exp.binary(BinOp::MulDiv(Multitive::Mul))),
+                "/" => stack.push(exp.binary(BinOp::MulDiv(Multitive::Div))),
                 "=" => {
                     if let Exp::Ident(s) = exp {
                         stack.push(make_assign(&s))

@@ -88,24 +88,24 @@ impl BinaryExp {
 }
 
 impl Exp {
-    pub fn make_bexpl(&mut self, op: BinOp) -> Self {
+    pub fn binary(&mut self, op: BinOp) -> Self {
         match self {
             Exp::Bin(ref mut b) => {
                 if b.op >= op {
                     Exp::Bin(BinaryExp::new(self.clone(), op))
                 } else {
-                    b.rhs = Box::new(b.rhs.make_bexpl(op));
+                    b.rhs = Box::new(b.rhs.binary(op));
                     self.clone()
                 }
             }
             Exp::Assign(subst) => Exp::Assign(Assignment {
                 ident: subst.ident.clone(),
-                rhs: Box::new(subst.rhs.make_bexpl(op)),
+                rhs: Box::new(subst.rhs.binary(op)),
             }),
             Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op)),
             Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op)),
             Exp::Child(b) => Exp::Bin(BinaryExp::new(Exp::Child(b.clone()), op)),
-            Exp::Return(r) => Exp::Return(Box::new(r.as_mut().make_bexpl(op))),
+            Exp::Return(r) => Exp::Return(Box::new(r.as_mut().binary(op))),
             Exp::Undef => unreachable!(),
         }
     }
