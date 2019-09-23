@@ -1,5 +1,5 @@
 use crate::exps::*;
-use crate::token::{KeywordType, Token, TokenType};
+use crate::token::*;
 
 #[derive(Debug)]
 pub enum Ast {
@@ -22,14 +22,6 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                         stack.push(make_assign(&s))
                     }
                 }
-                "(" => {
-                    stack.push(exp);
-                    stack.push(Exp::Undef)
-                }
-                ")" => {
-                    let parent = stack.pop().expect("parent");
-                    stack.push(parent.extend(Exp::Child(Box::new(exp))))
-                }
                 ";" => {
                     stack.push(exp);
                     stack.push(Exp::Undef)
@@ -40,6 +32,14 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             TokenType::Ident => stack.push(exp.extend(Exp::Ident(s.to_string()))),
             TokenType::Keyword(KeywordType::Return) => {
                 stack.push(Exp::Return(Box::new(Exp::Undef)))
+            }
+            TokenType::Paren(Bracket::Begin) => {
+                stack.push(exp);
+                stack.push(Exp::Undef)
+            }
+            TokenType::Paren(Bracket::End) => {
+                let parent = stack.pop().expect("parent");
+                stack.push(parent.extend(Exp::Child(Box::new(exp))))
             }
         }
     }
