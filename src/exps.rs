@@ -23,6 +23,7 @@ pub enum Exp {
     Child(Box<Exp>),
     Assign(Assignment),
     Return(Box<Exp>),
+    If(Conditional),
     Undef,
 }
 
@@ -59,6 +60,19 @@ pub fn make_assign(ident: &str) -> Exp {
         ident: ident.to_string(),
         rhs: Box::new(Exp::Undef),
     })
+}
+
+#[derive(Debug, Clone)]
+pub struct Conditional {
+    pub state: IfState,
+    pub cond: Box<Exp>,
+    pub iftrue: Box<Exp>,
+}
+
+#[derive(Debug, Clone)]
+pub enum IfState {
+    Cond,
+    IfTrue,
 }
 
 #[derive(Debug, Clone)]
@@ -105,6 +119,10 @@ impl Exp {
             Exp::Num(s) => Exp::Bin(BinaryExp::new(Exp::Num(s.to_string()), op)),
             Exp::Ident(s) => Exp::Bin(BinaryExp::new(Exp::Ident(s.to_string()), op)),
             Exp::Child(b) => Exp::Bin(BinaryExp::new(Exp::Child(b.clone()), op)),
+            Exp::If(ifexp) => match ifexp.state {
+                IfState::Cond => ifexp.cond.binary(op),
+                IfState::IfTrue => ifexp.iftrue.binary(op),
+            },
             Exp::Return(r) => Exp::Return(Box::new(r.as_mut().binary(op))),
             Exp::Undef => unreachable!(),
         }
@@ -121,6 +139,10 @@ impl Exp {
                     _ => unreachable!(),
                 }),
             }),
+            Exp::If(ifexp) => match ifexp.state {
+                IfState::Cond => ifexp.cond.extend(exp),
+                IfState::IfTrue => ifexp.iftrue.extend(exp),
+            },
             Exp::Return(boxed) => Exp::Return(Box::new(boxed.clone().as_mut().extend(exp))),
             Exp::Undef => exp,
             _ => panic!("Unknown Syntax"),
