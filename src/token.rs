@@ -60,13 +60,15 @@ impl From<&char> for CharType {
 fn split_to_raw_tokens(buf: &str) -> Vec<(CharType, Vec<char>)> {
     let mut ret: Vec<(CharType, Vec<char>)> = vec![];
     for c in buf.chars() {
+        let cty = CharType::from(&c);
         match ret.last_mut() {
-            None => ret.push((CharType::from(&c), vec![c])),
+            None => ret.push((cty, vec![c])),
+            Some((CharType::Bracket, _)) => ret.push((cty, vec![c])),
             Some((ty, v)) => {
-                if *ty == CharType::from(&c) && *ty != CharType::Bracket {
+                if *ty == cty {
                     v.push(c)
                 } else {
-                    ret.push((CharType::from(&c), vec![c]))
+                    ret.push((cty, vec![c]))
                 }
             }
         }
