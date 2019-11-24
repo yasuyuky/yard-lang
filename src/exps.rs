@@ -139,9 +139,21 @@ impl Exp {
                     _ => unreachable!(),
                 }),
             }),
-            Exp::If(ifexp) => match ifexp.state {
-                IfState::Cond => ifexp.cond.extend(exp),
-                IfState::IfTrue => ifexp.iftrue.extend(exp),
+            Exp::If(Conditional {
+                state,
+                cond,
+                iftrue,
+            }) => match state {
+                IfState::Cond => Exp::If(Conditional {
+                    state: state.clone(),
+                    cond: Box::new(cond.extend(exp)),
+                    iftrue: iftrue.clone(),
+                }),
+                IfState::IfTrue => Exp::If(Conditional {
+                    state: state.clone(),
+                    cond: cond.clone(),
+                    iftrue: Box::new(cond.extend(exp)),
+                }),
             },
             Exp::Return(boxed) => Exp::Return(Box::new(boxed.clone().as_mut().extend(exp))),
             Exp::Undef => exp,
