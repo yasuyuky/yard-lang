@@ -33,7 +33,11 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
             TokenType::Keyword(KeywordType::Return) => {
                 stack.push(Exp::Return(Box::new(Exp::Undef)))
             }
-            TokenType::Keyword(KeywordType::If) => unimplemented!(),
+            TokenType::Keyword(KeywordType::If) => stack.push(Exp::If(Conditional {
+                state: IfState::Cond,
+                cond: Box::new(Exp::Undef),
+                iftrue: Box::new(Exp::Undef),
+            })),
             TokenType::Paren(Bracket::Begin) => {
                 stack.push(exp);
                 stack.push(Exp::Undef)
