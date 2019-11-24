@@ -26,6 +26,20 @@ pub fn make_ast(mut tokens: Vec<Token>) -> Ast {
                     stack.push(exp);
                     stack.push(Exp::Undef)
                 }
+                ":" => {
+                    if let Exp::If(Conditional {
+                        state: IfState::Cond,
+                        cond,
+                        iftrue,
+                    }) = exp
+                    {
+                        stack.push(Exp::If(Conditional {
+                            state: IfState::IfTrue,
+                            cond,
+                            iftrue,
+                        }))
+                    }
+                }
                 _ => panic!("Unknown operator"),
             },
             TokenType::Number => stack.push(exp.extend(Exp::Num(s.to_string()))),
